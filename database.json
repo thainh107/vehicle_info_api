@@ -1,0 +1,15 @@
+{
+    "dev": {
+        "driver": "mssql",
+        "user": "tcsystem",
+        "database": "dbias_tc_dev",
+        "password": "tcsystem",
+        "host": "172.16.1.246"
+    },
+
+    "production": {
+        "driver": "mysql",
+        "user": "root",
+        "database": "myapp"
+    }
+}
