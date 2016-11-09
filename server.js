@@ -3,6 +3,8 @@
 
 // call the packages we need
 
+var events = require('events');
+events.EventEmitter.defaultMaxListeners = 100;
 var express = require('express'); // call express
 var app = express(); // define our app using express
 var bodyParser = require('body-parser');
@@ -53,13 +55,7 @@ var port = process.env.PORT || 8080; // set our port
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router(); // get an instance of the express Router
-// app.options(/\.*/, function(req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
-//     res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-//     res.send(200);
-// });
-// middleware to use for all requests
+
 router.use(function(req, res, next) {
     // do logging
     console.log('Something is happening.');
@@ -284,30 +280,28 @@ router.route('/categories/vehicleyear')
 //Vehicle Models
 var ModelGroups = sequelize.import('./app/model/modelgroups')
 router.route('/categories/vehiclemodel/:makeCode')
-
-
-//Example : http://localhost:8080/api/categories/vehiclemodel/NI
-.get(function(req, res) {
-    // find multiple entries
-    ModelGroups.findAll({
-            where: {
-                isdeleted: 0,
-                isactive: 1,
-                makecode: req.params.makeCode
-            },
-            attributes: ['modelgroupid', 'ismfamily']
-        })
-        .then(function(modelgroups) {
-            if (modelgroups) {
-                res.json(modelgroups);
-            } else {
-                res.send(401, "modelgroups not found");
-            }
-        }, function(error) {
-            console.log(error);
-            res.send("modelgroups not found");
-        });
-});
+    //Example : http://localhost:8080/api/categories/vehiclemodel/NI
+    .get(function(req, res) {
+        // find multiple entries
+        ModelGroups.findAll({
+                where: {
+                    isdeleted: 0,
+                    isactive: 1,
+                    makecode: req.params.makeCode
+                },
+                attributes: ['modelgroupid', 'ismfamily']
+            })
+            .then(function(modelgroups) {
+                if (modelgroups) {
+                    res.json(modelgroups);
+                } else {
+                    res.send(401, "modelgroups not found");
+                }
+            }, function(error) {
+                console.log(error);
+                res.send("modelgroups not found");
+            });
+    });
 
 //Vehicle Use
 var VehicleUses = sequelize.import('./app/model/usageVehicleUse')
@@ -332,6 +326,108 @@ router.route('/categories/vehicleUse')
             }, function(error) {
                 console.log(error);
                 res.send("Vehicle use not found");
+            });
+    });
+//Regions Category
+var Regions = sequelize.import('./app/model/regions')
+router.route('/categories/regions')
+    //Example : http://localhost:8080/api/categories/regions
+    .get(function(req, res) {
+        // find multiple entries
+        Regions.findAll({
+                where: {
+                    isdeleted: 0
+                },
+                attributes: [
+                    'code', 'name'
+                ]
+            })
+            .then(function(regions) {
+                if (regions) {
+                    res.json(regions);
+                } else {
+                    res.send(401, "regions not found");
+                }
+            }, function(error) {
+                console.log(error);
+                res.send("regions not found");
+            });
+    });
+//Safety Features
+var SafetyFeatures = sequelize.import('./app/model/safetyfeatures')
+router.route('/categories/safetyfeatures')
+    //Example : http://localhost:8080/api/categories/safetyfeatures
+    .get(function(req, res) {
+        // find multiple entries
+        SafetyFeatures.findAll({
+                where: {
+                    isdeleted: 0,
+                    isactive: 1
+                },
+                attributes: [
+                    'code', 'description'
+                ]
+            })
+            .then(function(safetyfeatures) {
+                if (safetyfeatures) {
+                    res.json(safetyfeatures);
+                } else {
+                    res.send(401, "safetyfeatures not found");
+                }
+            }, function(error) {
+                console.log(error);
+                res.send("safetyfeatures not found");
+            });
+    });
+//Anti Theft
+var AntiTheft = sequelize.import('./app/model/antitheft')
+router.route('/categories/antitheft')
+    //Example : http://localhost:8080/api/categories/antitheft
+    .get(function(req, res) {
+        // find multiple entries
+        AntiTheft.findAll({
+                where: {
+                    isdeleted: 0,
+                    isactive: 1
+                },
+                attributes: [
+                    'code', 'description'
+                ]
+            })
+            .then(function(antithefts) {
+                if (antithefts) {
+                    res.json(antithefts);
+                } else {
+                    res.send(401, "antithefts not found");
+                }
+            }, function(error) {
+                console.log(error);
+                res.send("antithefts not found");
+            });
+    });
+//Anti Theft
+var Insurers = sequelize.import('./app/model/insurers')
+router.route('/categories/insurers')
+    //Example : http://localhost:8080/api/categories/insurers
+    .get(function(req, res) {
+        // find multiple entries
+        Insurers.findAll({
+                where: {
+                    isdeleted: 0
+                },
+                attributes: [
+                    'code', 'name'
+                ]
+            })
+            .then(function(insurers) {
+                if (insurers) {
+                    res.json(insurers);
+                } else {
+                    res.send(401, "Insurers not found");
+                }
+            }, function(error) {
+                console.log(error);
+                res.send("Insurers not found");
             });
     });
 // ----------------------------------------------------
