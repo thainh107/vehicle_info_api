@@ -284,26 +284,54 @@ router.route('/categories/vehicleyear')
 //Vehicle Models
 var ModelGroups = sequelize.import('./app/model/modelgroups')
 router.route('/categories/vehiclemodel/:makeCode')
-    //Example : http://localhost:8080/api/categories/vehiclemodel/NI
+
+
+//Example : http://localhost:8080/api/categories/vehiclemodel/NI
+.get(function(req, res) {
+    // find multiple entries
+    ModelGroups.findAll({
+            where: {
+                isdeleted: 0,
+                isactive: 1,
+                makecode: req.params.makeCode
+            },
+            attributes: ['modelgroupid', 'ismfamily']
+        })
+        .then(function(modelgroups) {
+            if (modelgroups) {
+                res.json(modelgroups);
+            } else {
+                res.send(401, "modelgroups not found");
+            }
+        }, function(error) {
+            console.log(error);
+            res.send("modelgroups not found");
+        });
+});
+
+//Vehicle Use
+var VehicleUses = sequelize.import('./app/model/usageVehicleUse')
+router.route('/categories/vehicleUse')
+    //Example : http://localhost:8080/api/categories/vehicleUse
     .get(function(req, res) {
         // find multiple entries
-        ModelGroups.findAll({
+        VehicleUses.findAll({
                 where: {
-                    isdeleted: 0,
-                    isactive: 1,
-                    makecode: req.params.makeCode
+                    isdeleted: 0
                 },
-                attributes: ['modelgroupid', 'ismfamily']
+                attributes: [
+                    'code', 'name'
+                ]
             })
-            .then(function(modelgroups) {
-                if (modelgroups) {
-                    res.json(modelgroups);
+            .then(function(vehicleuses) {
+                if (vehicleuses) {
+                    res.json(vehicleuses);
                 } else {
-                    res.send(401, "modelgroups not found");
+                    res.send(401, "Vehicle use not found");
                 }
             }, function(error) {
                 console.log(error);
-                res.send("modelgroups not found");
+                res.send("Vehicle use not found");
             });
     });
 // ----------------------------------------------------
