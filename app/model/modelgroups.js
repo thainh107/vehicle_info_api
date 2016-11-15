@@ -18,6 +18,7 @@ var sequelize = new Sequelize(config.database, config.user, password, {
 
 module.exports = function(sequelize, DataTypes) {
     var modelGroups = sequelize.define('ModelGroups', {
+        makecode: { primaryKey: true, type: Sequelize.STRING },
         bodytypeid: Sequelize.STRING,
         name: Sequelize.STRING
     }, {

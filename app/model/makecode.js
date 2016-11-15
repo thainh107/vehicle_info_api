@@ -18,7 +18,7 @@ var sequelize = new Sequelize(config.database, config.user, password, {
 
 module.exports = function(sequelize, DataTypes) {
     var Makes = sequelize.define('makes', {
-        code: Sequelize.STRING,
+        code: { primaryKey: true, type: Sequelize.STRING },
         name: Sequelize.STRING
     });
     return Makes;

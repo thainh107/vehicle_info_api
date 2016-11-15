@@ -44,6 +44,7 @@ var Make = sequelize.import('./app/model/makecode')
 var Made = sequelize.import('./app/model/madecode')
 var VBody = sequelize.import('./app/model/vehiclebody')
 var Garage = sequelize.import('./app/model/garagelocation')
+var ModelGroups = sequelize.import('./app/model/modelgroups')
 var Models = sequelize.import('./app/model/models')
     // configure app to use bodyParser()
     // this will let us get the data from a POST
@@ -161,6 +162,10 @@ router.route('/users/:user_id')
 });
 //------------------------ Categories load -------------------------
 //make code
+//model join table
+// ModelGroups.belongsTo(Make, { foreignKey: 'makecode' })
+// Make.hasMany(ModelGroups, { foreignKey: 'makecode' })
+
 router.route('/categories/makesCode')
     //Example : http://localhost:8080/api/categories/makesCode
     .get(function(req, res) {
@@ -168,8 +173,11 @@ router.route('/categories/makesCode')
         Make.findAll({
                 where: {
                     isdeleted: 0
+                        // ,code: 'NI'
                 },
-                attributes: ['code', 'name']
+                // include: [{ model: ModelGroups, required: false, attributes: ['modelgroupid', 'ismfamily'], where: { isdeleted: 0, isactive: 1 } }],
+                attributes: ['code', 'name'],
+                order: 'name DESC'
             })
             .then(function(makes) {
                 if (makes) {
@@ -278,7 +286,7 @@ router.route('/categories/vehicleyear')
             });
     });
 //Vehicle Models
-var ModelGroups = sequelize.import('./app/model/modelgroups')
+
 router.route('/categories/vehiclemodel/:makeCode')
     //Example : http://localhost:8080/api/categories/vehiclemodel/NI
     .get(function(req, res) {
@@ -289,7 +297,34 @@ router.route('/categories/vehiclemodel/:makeCode')
                     isactive: 1,
                     makecode: req.params.makeCode
                 },
-                attributes: ['modelgroupid', 'ismfamily']
+                attributes: ['modelgroupid', 'ismfamily'],
+                order: 'ismfamily DESC'
+            })
+            .then(function(modelgroups) {
+                if (modelgroups) {
+                    res.json(modelgroups);
+                } else {
+                    res.send(401, "modelgroups not found");
+                }
+            }, function(error) {
+                console.log(error);
+                res.send("modelgroups not found");
+            });
+    });
+//Vehicle Models + Make
+
+router.route('/categories/vehiclemodelsss')
+    //Example : http://localhost:8080/api/categories/vehiclemodelsss/
+    .get(function(req, res) {
+        // find multiple entries
+        ModelGroups.findAll({
+                where: {
+                    isdeleted: 0,
+                    isactive: 1
+                },
+                attributes: ['modelgroupid', 'ismfamily'],
+                // include: [{ model: Make, required: true, attributes: ['code', 'name'], where: { isdeleted: 0 } }],
+                order: 'ismfamily DESC'
             })
             .then(function(modelgroups) {
                 if (modelgroups) {
@@ -430,6 +465,31 @@ router.route('/categories/insurers')
                 res.send("Insurers not found");
             });
     });
+
+//Vehicle Variant
+router.route('/categories/vehiclevariants')
+    //Example : http://localhost:8080/api/categories/vehiclevariants?modelgroupid&year
+    //Example : http://localhost:8080/api/categories/vehiclevariants?modelgroupid=9838E2D2-D24C-4C80-8DD2-BCA7929D9BBC&year=2007
+    //Example : http://localhost:8080/api/categories/vehiclevariants/MODELGROUPID/YEAR
+    .get(function(req, res) {
+        // find multiple entries
+        var id = req.query.modelgroupid;
+        var year = req.query.year;
+        console.log(req.query.modelgroupid + "______" + req.query.year)
+        if (year != 'undefined' && id != 'undefined') {
+            sequelize.query('spd_getModelVariantsDropDownByModelGroupYear @modelgroupid=\'' + id + '\', @year=\'' + year + '\';')
+                .then(function(vehiclevariants) {
+                    if (vehiclevariants) {
+                        res.json(vehiclevariants[0]);
+                    } else {
+                        res.send(401, "vehicle variants not found");
+                    }
+                }, function(error) {
+                    console.log(error);
+                    res.send("vehicle variants not found");
+                });
+        }
+    });
 // ----------------------------------------------------
 router.route('/vehicles/:vehiclesID')
     // get all the vehicles (accessed at GET http://localhost:8080/api/vehicles/:vehiclesID)
@@ -440,7 +500,7 @@ router.route('/vehicles/:vehiclesID')
                 where: {
                     vehicleid: req.params.vehiclesID
                 },
-                attributes: ['registrationno', 'logbookno', 'chassisno', 'engineno', 'seatcapacity', 'makecode', 'model', 'yearmake', 'createddatetime', 'createdby']
+                attributes: ['registrationno', 'logbookno', 'chassisno', 'engineno', 'seatcapacity', 'makecode', 'model', 'yearmake', 'createddatetime', 'createdby', 'modelgroupid']
             })
             .then(function(vehicles) {
                 if (vehicles) {
